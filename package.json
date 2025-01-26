@@ -1,0 +1,28 @@
+{
+  "name": "mini-parser",
+  "version": "0.1.0",
+  "description": "minimalist parser with post processing",
+  "type": "module",
+  "main": "index.js",
+  "types": "index.d.ts",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/nikimasek/mini-parser.git"
+  },
+  "keywords": [
+    "parser"
+  ],
+  "author": "Dominik Mašek",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/nikimasek/mini-parser/issues"
+  },
+  "homepage": "https://github.com/nikimasek/mini-parser#readme",
+  "files": [
+    "package.json",
+    "README.md",
+    "LICENSE",
+    "index.js",
+    "index.d.ts"
+  ]
+}
