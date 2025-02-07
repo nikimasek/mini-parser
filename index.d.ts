@@ -1,10 +1,8 @@
-export const end: unique symbol;
+export type Rule<T> = (input: string) => [value: T, output: string] | null;
 
-export type Rule<T> = {
-    push(...rules: (Rule<T> | typeof end)[]): void;
-}
+export function end(eof: boolean = false): Rule<never>;
+export function rule<T, S>(pattern: RegExp, func: (input: S, ...values: string[]) => T, next: Rule<S>): Rule<T>;
+export function select<T>(...rules: Rule<T>[]): Rule<T>;
+export function repeat<T, R, P>(rule: Rule<R>, func: (next: P, values: R[]) => T, min: number, max: number, next: Rule<P>): Rule<T>;
 
-export function rule<T>(pattern: string, map: (this: T, value: string) => void, ...roles: Rule<T>[]): Rule<T>;
-export function rule<T>(pattern: RegExp, map: (this: T, ...groups: string[]) => void, ...rules: Rule<T>[]): Rule<T>;
-
-export function parser<T>(rule: Rule<T>): (input: string, self: T) => boolean;
+export function parser<T>(rule: Rule<T>): T | null;

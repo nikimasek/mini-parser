@@ -1,31 +1,48 @@
-export const end = Symbol();
-
-export function rule() {
-    return [...arguments];
+function rule(pattern, func, next) {
+    return (input) => {
+        const matched = pattern.exec(input);
+        if (!matched || matched.index) return null;
+        const rest = input.substring(matched[0].length);
+        const x = next(rest);
+        if (!x) return null;
+        return [func(x[0], ...matched), x[1]];
+    }
 }
 
-export function parser(rule) {
-    function match(self, input, rule) {
-        if (rule === end) return input.length == 0 ? [] : null;
-        let matched;
-        if (typeof rule[0] == 'string') {
-            if (!input.startsWith(rule[0])) return null;
-            matched = [rule[0]];
-        } else if (rule[0] instanceof RegExp) {
-            const x = input.match(rule[0]);
-            if (!x || x.index != 0) return null;
-            matched = [...x];
-        } else
-            return null;
-        const rest = input.substring(matched[0].length);
-        const tail = rule.slice(2).reduce((result, rule) => result || match(self, rest, rule), null);
-        if (tail == null) return null;
-        tail.unshift(rule[1].bind(self, ...matched));
-        return tail;
+function select(...rules) {
+    return (input) => {
+        for (const rule of rules) {
+            const matched = rule(input);
+            if (matched) return matched;
+        }
+        return null;
     }
-    return (input, self) => {
-        const result = match(self, input, rule);
-        result?.forEach(Reflect.apply);
-        return Boolean(result);
-    };
+}
+
+function repeat(rule, func, min, max, next) {
+    return (input) => {
+        const result = [];
+        let i = 0, value;
+        while (i++ <= max) {
+            const matched = rule(input);
+            if (!matched) break;
+            [value, input] = matched;
+            result.push(value);
+        }
+        if (result.length < min) return null;
+        const matched = next(input);
+        return matched ? [func(matched[0], result), matched[1]] : null;
+    }
+}
+
+function end(eof = false) {
+    return (input) => (eof && input.length != 0) ? null : [null, input];
+}
+
+function parser(rule) {
+    return (input) => {
+        const matched = rule(input);
+        if (!matched || matched[1].length) return null;
+        return matched[0];
+    }
 }

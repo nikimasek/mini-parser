@@ -1,20 +1,21 @@
-# Mini Parser
+# Small Parser
 
 Minimalist parser with post processing.
 
 ## Example
 
 ```JavaScript
-const o = rule('(', function () { this.push([]); });
-const n = rule(/^-?\d+/, function (x) { this.at(-1).push(+x); });
-const p = rule(/^[-+]/, function (x) { this.at(-1).push(x) });
-const c = rule(')', function () { this.at(-2).push(this.pop()); });
-o.push(n, o);
-n.push(p, c, end);
-p.push(n, o);
-c.push(c, p, end);
-const example = [[]];
-parser(rule('', () => { }, n, o))('5+(3-6)-2', example);
-console.log(example);
-// [ [ 5, '+', [ 3, '-', 6 ], '-', 2 ] ]
+const example = parser(
+    rule(
+        /\d+/, (a, b) => a + +b,
+        repeat(
+            rule(
+                /[-+]/, (x, y) => x * (y == '-' ? -1 : 1),
+                rule(/\d+/, (_, x) => +x, end())),
+            (_, x) => x.reduce((a, b) => a + b, 0),
+            0, Infinity,
+            end(true)
+        )));
+
+console.log(example('3+4-2+5+2'))
 ```
